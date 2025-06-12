@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">personal-finance-manager</a> &gt; <a href="index.source.html" class="el_package">com.example.personalfinance.controller</a> &gt; <span class="el_source">TransactionController.java</span></div><h1>TransactionController.java</h1><pre class="source lang-java linenums">package com.example.personalfinance.controller;
+
+import com.example.personalfinance.dto.TransactionRequest;
+import com.example.personalfinance.dto.TransactionUpdateRequest;
+import com.example.personalfinance.entity.Transaction;
+import com.example.personalfinance.entity.User;
+import com.example.personalfinance.service.TransactionService;
+import com.example.personalfinance.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Controller for transaction operations
+ */
+@RestController
+@RequestMapping(&quot;/transactions&quot;)
+<span class="nc" id="L27">public class TransactionController {</span>
+    
+    @Autowired
+    private TransactionService transactionService;
+    
+    @Autowired
+    private UserService userService;
+    
+    /**
+     * Create a new transaction
+     */
+    @PostMapping
+    public ResponseEntity&lt;Transaction&gt; createTransaction(@Valid @RequestBody TransactionRequest request, Authentication auth) {
+<span class="nc" id="L40">        User user = userService.findByUsername(auth.getName());</span>
+<span class="nc" id="L41">        Transaction transaction = transactionService.createTransaction(request, user);</span>
+<span class="nc" id="L42">        return ResponseEntity.status(HttpStatus.CREATED).body(transaction);</span>
+    }
+    
+    /**
+     * Get transactions with optional filtering
+     */
+    @GetMapping
+    public ResponseEntity&lt;Map&lt;String, List&lt;Transaction&gt;&gt;&gt; getTransactions(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String category,
+            Authentication auth) {
+        
+<span class="nc" id="L55">        User user = userService.findByUsername(auth.getName());</span>
+        List&lt;Transaction&gt; transactions;
+        
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        if (startDate != null &amp;&amp; endDate != null) {</span>
+<span class="nc" id="L59">            transactions = transactionService.getTransactionsByDateRange(user, startDate, endDate);</span>
+<span class="nc bnc" id="L60" title="All 4 branches missed.">        } else if (category != null &amp;&amp; !category.isEmpty()) {</span>
+<span class="nc" id="L61">            transactions = transactionService.getTransactionsByCategory(user, category);</span>
+        } else {
+<span class="nc" id="L63">            transactions = transactionService.getAllTransactions(user);</span>
+        }
+        
+<span class="nc" id="L66">        Map&lt;String, List&lt;Transaction&gt;&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L67">        response.put(&quot;transactions&quot;, transactions);</span>
+        
+<span class="nc" id="L69">        return ResponseEntity.ok(response);</span>
+    }
+    
+    /**
+     * Update a transaction
+     */
+    @PutMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Transaction&gt; updateTransaction(@PathVariable Long id, 
+                                                        @Valid @RequestBody TransactionUpdateRequest request, 
+                                                        Authentication auth) {
+<span class="nc" id="L79">        User user = userService.findByUsername(auth.getName());</span>
+<span class="nc" id="L80">        Transaction transaction = transactionService.updateTransaction(id, request, user);</span>
+<span class="nc" id="L81">        return ResponseEntity.ok(transaction);</span>
+    }
+    
+    /**
+     * Delete a transaction
+     */
+    @DeleteMapping(&quot;/{id}&quot;)
+    public ResponseEntity&lt;Map&lt;String, String&gt;&gt; deleteTransaction(@PathVariable Long id, Authentication auth) {
+<span class="nc" id="L89">        User user = userService.findByUsername(auth.getName());</span>
+<span class="nc" id="L90">        transactionService.deleteTransaction(id, user);</span>
+        
+<span class="nc" id="L92">        Map&lt;String, String&gt; response = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L93">        response.put(&quot;message&quot;, &quot;Transaction deleted successfully&quot;);</span>
+        
+//        return ResponseEntity.  &quot;Transaction deleted successfully&quot;);
+        
+<span class="nc" id="L97">        return ResponseEntity.ok(response);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

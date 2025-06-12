@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SavingsGoalService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">personal-finance-manager</a> &gt; <a href="index.source.html" class="el_package">com.example.personalfinance.service</a> &gt; <span class="el_source">SavingsGoalService.java</span></div><h1>SavingsGoalService.java</h1><pre class="source lang-java linenums">package com.example.personalfinance.service;
+
+import com.example.personalfinance.dto.SavingsGoalRequest;
+import com.example.personalfinance.dto.SavingsGoalUpdateRequest;
+import com.example.personalfinance.entity.Category;
+import com.example.personalfinance.entity.SavingsGoal;
+import com.example.personalfinance.entity.User;
+import com.example.personalfinance.exception.SavingsGoalNotFoundException;
+import com.example.personalfinance.repository.SavingsGoalRepository;
+import com.example.personalfinance.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * Service class for savings goal management operations
+ */
+@Service
+@Transactional
+<span class="nc" id="L24">public class SavingsGoalService {</span>
+    
+    @Autowired
+    private SavingsGoalRepository savingsGoalRepository;
+    
+    @Autowired
+    private TransactionRepository transactionRepository;
+    
+    /**
+     * Create a new savings goal
+     */
+    public SavingsGoal createGoal(SavingsGoalRequest request, User user) {
+<span class="nc" id="L36">        SavingsGoal goal = new SavingsGoal();</span>
+<span class="nc" id="L37">        goal.setGoalName(request.getGoalName());</span>
+<span class="nc" id="L38">        goal.setTargetAmount(request.getTargetAmount());</span>
+<span class="nc" id="L39">        goal.setTargetDate(request.getTargetDate());</span>
+        
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (request.getStartDate() != null) {</span>
+<span class="nc" id="L42">            goal.setStartDate(request.getStartDate());</span>
+        }
+        
+<span class="nc" id="L45">        goal.setUser(user);</span>
+        
+<span class="nc" id="L47">        SavingsGoal savedGoal = savingsGoalRepository.save(goal);</span>
+<span class="nc" id="L48">        calculateProgress(savedGoal);</span>
+<span class="nc" id="L49">        return savedGoal;</span>
+    }
+    
+    /**
+     * Get all goals for a user
+     */
+    public List&lt;SavingsGoal&gt; getAllGoals(User user) {
+<span class="nc" id="L56">        List&lt;SavingsGoal&gt; goals = savingsGoalRepository.findByUser(user);</span>
+<span class="nc" id="L57">        goals.forEach(this::calculateProgress);</span>
+<span class="nc" id="L58">        return goals;</span>
+    }
+    
+    /**
+     * Get a specific goal
+     */
+    public SavingsGoal getGoal(Long id, User user) {
+<span class="nc" id="L65">        SavingsGoal goal = savingsGoalRepository.findByIdAndUser(id, user)</span>
+<span class="nc" id="L66">            .orElseThrow(() -&gt; new SavingsGoalNotFoundException(&quot;Savings goal not found&quot;));</span>
+<span class="nc" id="L67">        calculateProgress(goal);</span>
+<span class="nc" id="L68">        return goal;</span>
+    }
+    
+    /**
+     * Update a savings goal
+     */
+    public SavingsGoal updateGoal(Long id, SavingsGoalUpdateRequest request, User user) {
+<span class="nc" id="L75">        SavingsGoal goal = savingsGoalRepository.findByIdAndUser(id, user)</span>
+<span class="nc" id="L76">            .orElseThrow(() -&gt; new SavingsGoalNotFoundException(&quot;Savings goal not found&quot;));</span>
+        
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (request.getTargetAmount() != null) {</span>
+<span class="nc" id="L79">            goal.setTargetAmount(request.getTargetAmount());</span>
+        }
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (request.getTargetDate() != null) {</span>
+<span class="nc" id="L82">            goal.setTargetDate(request.getTargetDate());</span>
+        }
+        
+<span class="nc" id="L85">        SavingsGoal savedGoal = savingsGoalRepository.save(goal);</span>
+<span class="nc" id="L86">        calculateProgress(savedGoal);</span>
+<span class="nc" id="L87">        return savedGoal;</span>
+    }
+    
+    /**
+     * Delete a savings goal
+     */
+    public void deleteGoal(Long id, User user) {
+<span class="nc" id="L94">        SavingsGoal goal = savingsGoalRepository.findByIdAndUser(id, user)</span>
+<span class="nc" id="L95">            .orElseThrow(() -&gt; new SavingsGoalNotFoundException(&quot;Savings goal not found&quot;));</span>
+        
+<span class="nc" id="L97">        savingsGoalRepository.delete(goal);</span>
+<span class="nc" id="L98">    }</span>
+    
+    /**
+     * Calculate progress for a savings goal
+     */
+    private void calculateProgress(SavingsGoal goal) {
+<span class="nc" id="L104">        BigDecimal totalIncome = transactionRepository</span>
+<span class="nc" id="L105">            .sumAmountByUserAndTypeAndDateAfter(goal.getUser(), Category.CategoryType.INCOME, goal.getStartDate());</span>
+<span class="nc" id="L106">        BigDecimal totalExpenses = transactionRepository</span>
+<span class="nc" id="L107">            .sumAmountByUserAndTypeAndDateAfter(goal.getUser(), Category.CategoryType.EXPENSE, goal.getStartDate());</span>
+        
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (totalIncome == null) totalIncome = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        if (totalExpenses == null) totalExpenses = BigDecimal.ZERO;</span>
+        
+<span class="nc" id="L112">        goal.calculateProgress(totalIncome, totalExpenses);</span>
+<span class="nc" id="L113">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,5 @@
+com\example\personalfinance\service\UserServiceTest.class
+com\example\personalfinance\service\TransactionServiceTest.class
+com\example\personalfinance\repository\UserRepositoryTest.class
+com\example\personalfinance\controller\AuthControllerTest.class
+com\example\personalfinance\service\CategoryServiceTest.class

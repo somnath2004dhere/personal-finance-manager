@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">personal-finance-manager</a> &gt; <a href="index.source.html" class="el_package">com.example.personalfinance.service</a> &gt; <span class="el_source">TransactionService.java</span></div><h1>TransactionService.java</h1><pre class="source lang-java linenums">package com.example.personalfinance.service;
+
+import com.example.personalfinance.dto.TransactionRequest;
+import com.example.personalfinance.dto.TransactionUpdateRequest;
+import com.example.personalfinance.entity.Category;
+import com.example.personalfinance.entity.Transaction;
+import com.example.personalfinance.entity.User;
+import com.example.personalfinance.exception.TransactionNotFoundException;
+import com.example.personalfinance.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * Service class for transaction management operations
+ */
+@Service
+@Transactional
+<span class="fc" id="L22">public class TransactionService {</span>
+    
+    @Autowired
+    private TransactionRepository transactionRepository;
+    
+    @Autowired
+    private CategoryService categoryService;
+    
+    /**
+     * Create a new transaction
+     */
+    public Transaction createTransaction(TransactionRequest request, User user) {
+<span class="fc" id="L34">        Category category = categoryService.findCategoryByNameForUser(request.getCategory(), user);</span>
+        
+<span class="fc" id="L36">        Transaction transaction = new Transaction();</span>
+<span class="fc" id="L37">        transaction.setAmount(request.getAmount());</span>
+<span class="fc" id="L38">        transaction.setDate(request.getDate());</span>
+<span class="fc" id="L39">        transaction.setCategory(request.getCategory());</span>
+<span class="fc" id="L40">        transaction.setDescription(request.getDescription());</span>
+<span class="fc" id="L41">        transaction.setType(category.getType());</span>
+<span class="fc" id="L42">        transaction.setUser(user);</span>
+        
+<span class="fc" id="L44">        return transactionRepository.save(transaction);</span>
+    }
+    
+    /**
+     * Get all transactions for a user
+     */
+    public List&lt;Transaction&gt; getAllTransactions(User user) {
+<span class="fc" id="L51">        return transactionRepository.findByUserOrderByDateDesc(user);</span>
+    }
+    
+    /**
+     * Get transactions by date range
+     */
+    public List&lt;Transaction&gt; getTransactionsByDateRange(User user, LocalDate startDate, LocalDate endDate) {
+<span class="fc" id="L58">        return transactionRepository.findByUserAndDateBetweenOrderByDateDesc(user, startDate, endDate);</span>
+    }
+    
+    /**
+     * Get transactions by category
+     */
+    public List&lt;Transaction&gt; getTransactionsByCategory(User user, String category) {
+<span class="fc" id="L65">        return transactionRepository.findByUserAndCategoryOrderByDateDesc(user, category);</span>
+    }
+    
+    /**
+     * Update a transaction
+     */
+    public Transaction updateTransaction(Long id, TransactionUpdateRequest request, User user) {
+<span class="fc" id="L72">        Transaction transaction = transactionRepository.findById(id)</span>
+<span class="fc" id="L73">            .orElseThrow(() -&gt; new TransactionNotFoundException(&quot;Transaction not found&quot;));</span>
+        
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if (!transaction.getUser().getId().equals(user.getId())) {</span>
+<span class="fc" id="L76">            throw new TransactionNotFoundException(&quot;Transaction not found&quot;);</span>
+        }
+        
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (request.getAmount() != null) {</span>
+<span class="fc" id="L80">            transaction.setAmount(request.getAmount());</span>
+        }
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if (request.getDescription() != null) {</span>
+<span class="fc" id="L83">            transaction.setDescription(request.getDescription());</span>
+        }
+        
+<span class="fc" id="L86">        return transactionRepository.save(transaction);</span>
+    }
+    
+    /**
+     * Delete a transaction
+     */
+    public void deleteTransaction(Long id, User user) {
+<span class="fc" id="L93">        Transaction transaction = transactionRepository.findById(id)</span>
+<span class="fc" id="L94">            .orElseThrow(() -&gt; new TransactionNotFoundException(&quot;Transaction not found&quot;));</span>
+        
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if (!transaction.getUser().getId().equals(user.getId())) {</span>
+<span class="fc" id="L97">            throw new TransactionNotFoundException(&quot;Transaction not found&quot;);</span>
+        }
+        
+<span class="fc" id="L100">        transactionRepository.delete(transaction);</span>
+<span class="fc" id="L101">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

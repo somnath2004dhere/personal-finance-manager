@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CategoryService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">personal-finance-manager</a> &gt; <a href="index.source.html" class="el_package">com.example.personalfinance.service</a> &gt; <span class="el_source">CategoryService.java</span></div><h1>CategoryService.java</h1><pre class="source lang-java linenums">package com.example.personalfinance.service;
+
+import com.example.personalfinance.dto.CategoryRequest;
+import com.example.personalfinance.entity.Category;
+import com.example.personalfinance.entity.User;
+import com.example.personalfinance.exception.CategoryAlreadyExistsException;
+import com.example.personalfinance.exception.CategoryInUseException;
+import com.example.personalfinance.exception.CategoryNotFoundException;
+import com.example.personalfinance.exception.UnauthorizedOperationException;
+import com.example.personalfinance.repository.CategoryRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.annotation.PostConstruct;
+import java.util.List;
+
+/**
+ * Service class for category management operations
+ */
+@Service
+@Transactional
+<span class="fc" id="L23">public class CategoryService {</span>
+    
+    @Autowired
+    private CategoryRepository categoryRepository;
+    
+    /**
+     * Initialize default categories on application startup
+     */
+    @PostConstruct
+    public void initializeDefaultCategories() {
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (categoryRepository.count() == 0) {</span>
+            // Default INCOME categories
+<span class="nc" id="L35">            categoryRepository.save(new Category(&quot;Salary&quot;, Category.CategoryType.INCOME, false, null));</span>
+            
+            // Default EXPENSE categories
+<span class="nc" id="L38">            categoryRepository.save(new Category(&quot;Food&quot;, Category.CategoryType.EXPENSE, false, null));</span>
+<span class="nc" id="L39">            categoryRepository.save(new Category(&quot;Rent&quot;, Category.CategoryType.EXPENSE, false, null));</span>
+<span class="nc" id="L40">            categoryRepository.save(new Category(&quot;Transportation&quot;, Category.CategoryType.EXPENSE, false, null));</span>
+<span class="nc" id="L41">            categoryRepository.save(new Category(&quot;Entertainment&quot;, Category.CategoryType.EXPENSE, false, null));</span>
+<span class="nc" id="L42">            categoryRepository.save(new Category(&quot;Healthcare&quot;, Category.CategoryType.EXPENSE, false, null));</span>
+<span class="nc" id="L43">            categoryRepository.save(new Category(&quot;Utilities&quot;, Category.CategoryType.EXPENSE, false, null));</span>
+        }
+<span class="nc" id="L45">    }</span>
+    
+    /**
+     * Get all categories available to a user
+     */
+    public List&lt;Category&gt; getAllCategoriesForUser(User user) {
+<span class="fc" id="L51">        return categoryRepository.findByUserOrUserIsNull(user);</span>
+    }
+    
+    /**
+     * Create a custom category for a user
+     */
+    public Category createCustomCategory(CategoryRequest request, User user) {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (categoryRepository.existsByNameAndUser(request.getName(), user) || </span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            categoryRepository.findByNameAndUser(request.getName(), null).isPresent()) {</span>
+<span class="fc" id="L60">            throw new CategoryAlreadyExistsException(&quot;Category with name &quot; + request.getName() + &quot; already exists&quot;);</span>
+        }
+        
+<span class="fc" id="L63">        Category category = new Category();</span>
+<span class="fc" id="L64">        category.setName(request.getName());</span>
+<span class="fc" id="L65">        category.setType(request.getType());</span>
+<span class="fc" id="L66">        category.setCustom(true);</span>
+<span class="fc" id="L67">        category.setUser(user);</span>
+        
+<span class="fc" id="L69">        return categoryRepository.save(category);</span>
+    }
+    
+    /**
+     * Delete a custom category
+     */
+    public void deleteCustomCategory(String categoryName, User user) {
+<span class="fc" id="L76">        Category category = categoryRepository.findByNameAndUser(categoryName, user)</span>
+<span class="fc" id="L77">            .orElseThrow(() -&gt; new CategoryNotFoundException(&quot;Category not found&quot;));</span>
+        
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (!category.isCustom()) {</span>
+<span class="fc" id="L80">            throw new UnauthorizedOperationException(&quot;Cannot delete default categories&quot;);</span>
+        }
+        
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (categoryRepository.isCategoryUsedInTransactions(categoryName, user)) {</span>
+<span class="fc" id="L84">            throw new CategoryInUseException(&quot;Cannot delete category that is referenced by transactions&quot;);</span>
+        }
+        
+<span class="fc" id="L87">        categoryRepository.delete(category);</span>
+<span class="fc" id="L88">    }</span>
+    
+    /**
+     * Find category by name for a user
+     */
+    public Category findCategoryByNameForUser(String categoryName, User user) {
+<span class="fc" id="L94">        return categoryRepository.findByNameAndUser(categoryName, user)</span>
+<span class="fc" id="L95">            .orElseThrow(() -&gt; new CategoryNotFoundException(&quot;Category not found&quot;));</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

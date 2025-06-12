@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransactionRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">personal-finance-manager</a> &gt; <a href="index.source.html" class="el_package">com.example.personalfinance.dto</a> &gt; <span class="el_source">TransactionRequest.java</span></div><h1>TransactionRequest.java</h1><pre class="source lang-java linenums">package com.example.personalfinance.dto;
+
+import jakarta.validation.constraints.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+/**
+ * DTO for transaction creation requests
+ */
+<span class="fc" id="L11">public class TransactionRequest {</span>
+    @DecimalMin(value = &quot;0.01&quot;, message = &quot;Amount must be positive&quot;)
+    @NotNull(message = &quot;Amount is required&quot;)
+    private BigDecimal amount;
+
+    @NotNull(message = &quot;Date is required&quot;)
+    @PastOrPresent(message = &quot;Date cannot be in the future&quot;)
+    private LocalDate date;
+
+    @NotBlank(message = &quot;Category is required&quot;)
+    private String category;
+
+    private String description;
+
+    // Getters and Setters
+<span class="fc" id="L26">    public BigDecimal getAmount() { return amount; }</span>
+<span class="fc" id="L27">    public void setAmount(BigDecimal amount) { this.amount = amount; }</span>
+
+<span class="fc" id="L29">    public LocalDate getDate() { return date; }</span>
+<span class="fc" id="L30">    public void setDate(LocalDate date) { this.date = date; }</span>
+
+<span class="fc" id="L32">    public String getCategory() { return category; }</span>
+<span class="fc" id="L33">    public void setCategory(String category) { this.category = category; }</span>
+
+<span class="fc" id="L35">    public String getDescription() { return description; }</span>
+<span class="fc" id="L36">    public void setDescription(String description) { this.description = description; }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
