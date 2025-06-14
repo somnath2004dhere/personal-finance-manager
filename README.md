@@ -2,7 +2,7 @@
 
 A comprehensive personal finance management system built with Spring Boot that enables users to effectively track their income, expenses, and savings goals through a robust web-based application.
 
-## 🚀 Features
+## Features
 
 ### Core Functionality
 - **User Management & Authentication**
@@ -59,7 +59,7 @@ A comprehensive personal finance management system built with Spring Boot that e
 
 ### 1. Clone the Repository
 \`\`\`bash
-git clone https://github.com/yourusername/personal-finance-manager.git
+git clone https://github.com/somnath2004dhere/personal-finance-manager.git
 cd personal-finance-manager
 \`\`\`
 

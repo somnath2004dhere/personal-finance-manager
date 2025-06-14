@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Controller for authentication operations
- */
+// Controller for authentication operations
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -32,9 +31,8 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
     
-    /**
-     * Register a new user
-     */
+    //Register a new user
+
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody UserRegistrationRequest request) {
         User user = userService.registerUser(request);
@@ -46,9 +44,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     
-    /**
-     * Login user
-     */
+     // Login user
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody UserLoginRequest request, HttpServletRequest httpRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -66,9 +62,9 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
     
-    /**
-     * Logout user
-     */
+
+      // Logout user
+
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);

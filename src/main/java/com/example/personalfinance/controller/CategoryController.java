@@ -16,9 +16,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Controller for category operations
- */
+
+  // Controller for category operations
+
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
@@ -29,9 +29,9 @@ public class CategoryController {
     @Autowired
     private UserService userService;
     
-    /**
-     * Get all categories for the authenticated user
-     */
+
+       //Get all categories for the authenticated user
+
     @GetMapping
     public ResponseEntity<Map<String, List<Category>>> getAllCategories(Authentication auth) {
         User user = userService.findByUsername(auth.getName());
@@ -43,9 +43,9 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
     
-    /**
-     * Create a custom category
-     */
+
+     //Create a custom category
+
     @PostMapping
     public ResponseEntity<Category> createCategory(@Valid @RequestBody CategoryRequest request, Authentication auth) {
         User user = userService.findByUsername(auth.getName());
@@ -53,9 +53,9 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
     
-    /**
-     * Delete a custom category
-     */
+
+     //Delete a custom category
+
     @DeleteMapping("/{name}")
     public ResponseEntity<Map<String, String>> deleteCategory(@PathVariable String name, Authentication auth) {
         User user = userService.findByUsername(auth.getName());
